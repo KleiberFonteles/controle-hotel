@@ -1,0 +1,33 @@
+{
+  "usuarios": [
+    {
+      "id": 1,
+      "nome": "teste",
+      "email": "teste@gmail.com",
+      "senha": "teste"
+    },
+    {
+      "id": 2,
+      "nome": "teste",
+      "email": "teste@gmail.com",
+      "senha": "teste"
+    },
+    {
+      "id": 3,
+      "nome": "teste",
+      "email": "teste@gmail.com",
+      "senha": "teste"
+    }
+  ],
+  "reservas": [
+    {
+      "id": 1,
+      "cliente": "Senior Dev",
+      "hotel": "Grand Palace",
+      "entrada": "2026-06-01",
+      "saida": "2026-06-10",
+      "valor": 1500,
+      "status": "Confirmada"
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Login - Hotel</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial;
+}
+
+body{
+    background:#2563eb;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.login-box{
+    background:white;
+    padding:40px;
+    border-radius:10px;
+    width:350px;
+    box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:20px;
+    border:none;
+    background:#2563eb;
+    color:white;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+
+<h1>🏨 Login Hotel</h1>
+
+<input type="text" id="usuario" placeholder="Usuário">
+
+<input type="password" id="senha" placeholder="Senha">
+
+<button onclick="fazerLogin()">
+Entrar
+</button>
+
+</div>
+
+<script>
+
+async function fazerLogin(){
+    const usuario = document.getElementById('usuario').value.trim();
+    const senha = document.getElementById('senha').value.trim();
+
+    if (!usuario || !senha) {
+        alert('Por favor, preencha todos os campos!');
+        return;
+    }
+
+    try {
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `email=${encodeURIComponent(usuario)}&senha=${encodeURIComponent(senha)}`
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            localStorage.setItem('logado', 'sim');
+            window.location.href = data.redirect;
+        } else {
+            alert(data.message || 'Usuário ou senha incorretos');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Erro ao se conectar ao servidor');
+    }
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Usuários</title>
+    <link rel="stylesheet" href="/style.css">
+
+    <style>
+        table{
+            width:100%;
+            border-collapse: collapse;
+            background:white;
+            color:black;
+        }
+
+        th, td{
+            padding:12px;
+            border:1px solid #ccc;
+        }
+
+        .container-lista{
+            width:90%;
+            margin:auto;
+            margin-top:40px;
+        }
+
+        .btn-excluir{
+            background:red;
+            color:white;
+            padding:8px 12px;
+            border:none;
+            border-radius:5px;
+            text-decoration:none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-lista">
+
+<h1>Usuários - Listar</h1>
+
+<a href="/cadastro.html">
+<button>Incluir</button>
+</a>
+
+<br><br>
+
+<table>
+
+<tr>
+<th>ID</th>
+<th>Nome</th>
+<th>Email</th>
+<th>Ação</th>
+</tr>
+
+<% usuarios.forEach(usuario => { %>
+
+<tr>
+<td><%= usuario.id %></td>
+<td><%= usuario.nome %></td>
+<td><%= usuario.email %></td>
+
+<td>
+<a class="btn-excluir" href="/excluir/<%= usuario.id %>">
+Excluir
+</a>
+</td>
+
+</tr>
+
+<% }) %>
+
+</table>
+
+</div>
+
+</body>
+</html>

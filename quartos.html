@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Controle de Quartos</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial;
+}
+
+body{
+    background:#f1f5f9;
+}
+
+nav{
+    background:#2563eb;
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    color:white;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.menu{
+    display:flex;
+    gap:30px;
+    align-items:center;
+}
+
+.menu a{
+    color:white;
+    text-decoration:none;
+    font-size:16px;
+}
+
+.container{
+    width:90%;
+    margin:auto;
+    margin-top:40px;
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h1{
+    margin-bottom:20px;
+}
+
+button{
+    border:none;
+    padding:10px 15px;
+    border-radius:5px;
+    cursor:pointer;
+    color:white;
+    font-weight:bold;
+}
+
+.btn-add{
+    background:#2563eb;
+}
+
+.btn-edit{
+    background:#f59e0b;
+}
+
+.btn-delete{
+    background:#dc2626;
+}
+
+.btn-close{
+    background:red;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    padding:0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th, td{
+    border:1px solid #ccc;
+    padding:12px;
+    text-align:left;
+}
+
+th{
+    background:#dbeafe;
+}
+
+.modal{
+    display:none;
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    background:rgba(0,0,0,0.5);
+}
+
+.modal-content{
+    background:white;
+    width:400px;
+    margin:50px auto;
+    padding:20px;
+    border-radius:10px;
+}
+
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<nav>
+
+<div class="logo">
+🏨 Controle de Quartos
+</div>
+
+<div class="menu">
+
+<a href="crud.html">Reservas</a>
+
+<a href="quartos.html">Quartos</a>
+
+<a href="#" onclick="sair()">
+Sair
+</a>
+
+</div>
+
+</nav>
+
+<div class="container">
+
+<h1>Quartos - Listar</h1>
+
+<button class="btn-add" onclick="abrirModal()">
+Incluir Quarto
+</button>
+
+<table>
+
+<thead>
+
+<tr>
+<th>ID</th>
+<th>Número</th>
+<th>Tipo</th>
+<th>Capacidade</th>
+<th>Diária</th>
+<th>Status</th>
+<th>Ações</th>
+</tr>
+
+</thead>
+
+<tbody id="tabelaQuartos">
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="modal" id="modal">
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h2>Novo Quarto</h2>
+
+<button class="btn-close" onclick="fecharModal()">
+X
+</button>
+
+</div>
+
+<input type="text" id="numero" placeholder="Número do Quarto">
+
+<input type="text" id="tipo" placeholder="Tipo do Quarto">
+
+<input type="number" id="capacidade" placeholder="Capacidade">
+
+<input type="number" id="diaria" placeholder="Valor da Diária">
+
+<input type="text" id="status" placeholder="Status">
+
+<br><br>
+
+<button class="btn-add" onclick="salvarQuarto()">
+Salvar Quarto
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+/* LOGIN */
+
+if(localStorage.getItem('logado') != 'sim'){
+
+    window.location.href = 'login.html';
+
+}
+
+let quartos = JSON.parse(localStorage.getItem('quartos')) || [];
+
+let editando = null;
+
+function abrirModal(){
+
+    document.getElementById('modal').style.display = 'block';
+
+}
+
+function fecharModal(){
+
+    document.getElementById('modal').style.display = 'none';
+
+    document.getElementById('numero').value = '';
+    document.getElementById('tipo').value = '';
+    document.getElementById('capacidade').value = '';
+    document.getElementById('diaria').value = '';
+    document.getElementById('status').value = '';
+
+    editando = null;
+
+}
+
+function salvarQuarto(){
+
+    const numero = document.getElementById('numero').value;
+
+    const tipo = document.getElementById('tipo').value;
+
+    const capacidade = document.getElementById('capacidade').value;
+
+    const diaria = document.getElementById('diaria').value;
+
+    const status = document.getElementById('status').value;
+
+    if(numero === '' || tipo === ''){
+
+        alert('Preencha os campos');
+
+        return;
+
+    }
+
+    if(editando !== null){
+
+        quartos[editando].numero = numero;
+        quartos[editando].tipo = tipo;
+        quartos[editando].capacidade = capacidade;
+        quartos[editando].diaria = diaria;
+        quartos[editando].status = status;
+
+    } else {
+
+        quartos.push({
+
+            id: quartos.length + 1,
+            numero,
+            tipo,
+            capacidade,
+            diaria,
+            status
+
+        });
+
+    }
+
+    localStorage.setItem('quartos', JSON.stringify(quartos));
+
+    atualizarTabela();
+
+    fecharModal();
+
+}
+
+function atualizarTabela(){
+
+    const tabela = document.getElementById('tabelaQuartos');
+
+    tabela.innerHTML = '';
+
+    quartos.forEach((quarto, index) => {
+
+        tabela.innerHTML += `
+
+        <tr>
+
+            <td>${quarto.id}</td>
+            <td>${quarto.numero}</td>
+            <td>${quarto.tipo}</td>
+            <td>${quarto.capacidade}</td>
+            <td>R$ ${quarto.diaria}</td>
+            <td>${quarto.status}</td>
+
+            <td>
+
+                <button class="btn-edit"
+                onclick="editarQuarto(${index})">
+                Editar
+                </button>
+
+                <button class="btn-delete"
+                onclick="excluirQuarto(${index})">
+                Excluir
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+function excluirQuarto(index){
+
+    quartos.splice(index, 1);
+
+    localStorage.setItem('quartos', JSON.stringify(quartos));
+
+    atualizarTabela();
+
+}
+
+function editarQuarto(index){
+
+    editando = index;
+
+    document.getElementById('numero').value = quartos[index].numero;
+
+    document.getElementById('tipo').value = quartos[index].tipo;
+
+    document.getElementById('capacidade').value = quartos[index].capacidade;
+
+    document.getElementById('diaria').value = quartos[index].diaria;
+
+    document.getElementById('status').value = quartos[index].status;
+
+    abrirModal();
+
+}
+
+window.onclick = function(event){
+
+    const modal = document.getElementById('modal');
+
+    if(event.target == modal){
+
+        fecharModal();
+
+    }
+
+}
+
+function sair(){
+
+    localStorage.removeItem('logado');
+
+    window.location.href = 'login.html';
+
+}
+
+atualizarTabela();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Controle de Reservas de Hotel</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial;
+}
+
+body{
+    background:#f1f5f9;
+}
+
+/* MENU */
+
+nav{
+    background:#2563eb;
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    color:white;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.menu{
+    display:flex;
+    gap:30px;
+    align-items:center;
+}
+
+.menu a{
+    color:white;
+    text-decoration:none;
+    font-size:16px;
+}
+
+/* DROPDOWN */
+
+.dropdown{
+    position:relative;
+}
+
+.dropdown-content{
+    display:none;
+    position:absolute;
+    background:white;
+    min-width:180px;
+    top:30px;
+    border-radius:5px;
+    overflow:hidden;
+    box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+.dropdown-content a{
+    color:black;
+    padding:12px;
+    display:block;
+    text-decoration:none;
+}
+
+.dropdown-content a:hover{
+    background:#f1f1f1;
+}
+
+.dropdown:hover .dropdown-content{
+    display:block;
+}
+
+/* CONTAINER */
+
+.container{
+    width:90%;
+    margin:auto;
+    margin-top:40px;
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h1{
+    margin-bottom:20px;
+    color:#1e293b;
+}
+
+/* BOTÕES */
+
+button{
+    border:none;
+    padding:10px 15px;
+    border-radius:5px;
+    cursor:pointer;
+    color:white;
+    font-weight:bold;
+}
+
+.btn-add{
+    background:#2563eb;
+}
+
+.btn-edit{
+    background:#f59e0b;
+}
+
+.btn-delete{
+    background:#dc2626;
+}
+
+.btn-close{
+    background:red;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    padding:0;
+    font-size:16px;
+}
+
+/* TABELA */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th, td{
+    border:1px solid #ccc;
+    padding:12px;
+    text-align:left;
+}
+
+th{
+    background:#dbeafe;
+}
+
+/* MODAL */
+
+.modal{
+    display:none;
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    background:rgba(0,0,0,0.5);
+}
+
+.modal-content{
+    background:white;
+    width:400px;
+    margin:50px auto;
+    padding:20px;
+    border-radius:10px;
+}
+
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- MENU -->
+
+<nav>
+
+<div class="logo">
+🏨 Controle de Reservas de Hotel
+</div>
+
+<div class="menu">
+
+<a href="crud.html">Reservas</a>
+
+<a href="quartos.html">Quartos</a>
+
+<a href="#" onclick="sair()">
+Sair
+</a>
+
+</div>
+
+</nav>
+
+<!-- CONTAINER -->
+
+<div class="container">
+
+<h1>Reservas - Listar</h1>
+
+<button class="btn-add" onclick="abrirModal()">
+Incluir Reserva
+</button>
+
+<table>
+
+<thead>
+
+<tr>
+<th>ID</th>
+<th>Cliente</th>
+<th>Hotel</th>
+<th>Entrada</th>
+<th>Saída</th>
+<th>Valor</th>
+<th>Status</th>
+<th>Ações</th>
+</tr>
+
+</thead>
+
+<tbody id="tabelaReservas">
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- MODAL -->
+
+<div class="modal" id="modal">
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h2>Nova Reserva</h2>
+
+<button class="btn-close" onclick="fecharModal()">
+X
+</button>
+
+</div>
+
+<input type="text" id="cliente" placeholder="Nome do Cliente">
+
+<input type="text" id="hotel" placeholder="Nome do Hotel">
+
+<input type="date" id="entrada">
+
+<input type="date" id="saida">
+
+<input type="number" id="valor" placeholder="Valor da Reserva">
+
+<input type="text" id="status" placeholder="Status da Reserva">
+
+<br><br>
+
+<button class="btn-add" onclick="salvarReserva()">
+Salvar Reserva
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+/* PROTEÇÃO LOGIN */
+
+if(localStorage.getItem('logado') != 'sim'){
+
+    window.location.href = 'login.html';
+
+}
+
+/* LOCAL STORAGE */
+
+let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+
+let editando = null;
+
+/* ABRIR MODAL */
+
+function abrirModal(){
+
+    document.getElementById('modal').style.display = 'block';
+
+}
+
+/* FECHAR MODAL */
+
+function fecharModal(){
+
+    document.getElementById('modal').style.display = 'none';
+
+    document.getElementById('cliente').value = '';
+    document.getElementById('hotel').value = '';
+    document.getElementById('entrada').value = '';
+    document.getElementById('saida').value = '';
+    document.getElementById('valor').value = '';
+    document.getElementById('status').value = '';
+
+    editando = null;
+
+}
+
+/* SALVAR RESERVA */
+
+function salvarReserva(){
+
+    const cliente = document.getElementById('cliente').value;
+
+    const hotel = document.getElementById('hotel').value;
+
+    const entrada = document.getElementById('entrada').value;
+
+    const saida = document.getElementById('saida').value;
+
+    const valor = document.getElementById('valor').value;
+
+    const status = document.getElementById('status').value;
+
+    if(cliente === '' || hotel === ''){
+
+        alert('Preencha os campos obrigatórios');
+
+        return;
+
+    }
+
+    if(editando !== null){
+
+        reservas[editando].cliente = cliente;
+        reservas[editando].hotel = hotel;
+        reservas[editando].entrada = entrada;
+        reservas[editando].saida = saida;
+        reservas[editando].valor = valor;
+        reservas[editando].status = status;
+
+    } else {
+
+        reservas.push({
+
+            id: reservas.length + 1,
+            cliente,
+            hotel,
+            entrada,
+            saida,
+            valor,
+            status
+
+        });
+
+    }
+
+    /* SALVAR NO NAVEGADOR */
+
+    localStorage.setItem('reservas', JSON.stringify(reservas));
+
+    atualizarTabela();
+
+    fecharModal();
+
+}
+
+/* LISTAR RESERVAS */
+
+function atualizarTabela(){
+
+    const tabela = document.getElementById('tabelaReservas');
+
+    tabela.innerHTML = '';
+
+    reservas.forEach((reserva, index) => {
+
+        tabela.innerHTML += `
+
+        <tr>
+
+            <td>${reserva.id}</td>
+            <td>${reserva.cliente}</td>
+            <td>${reserva.hotel}</td>
+            <td>${reserva.entrada}</td>
+            <td>${reserva.saida}</td>
+            <td>R$ ${reserva.valor}</td>
+            <td>${reserva.status}</td>
+
+            <td>
+
+                <button class="btn-edit"
+                onclick="editarReserva(${index})">
+                Editar
+                </button>
+
+                <button class="btn-delete"
+                onclick="excluirReserva(${index})">
+                Excluir
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+/* EXCLUIR RESERVA */
+
+function excluirReserva(index){
+
+    reservas.splice(index, 1);
+
+    localStorage.setItem('reservas', JSON.stringify(reservas));
+
+    atualizarTabela();
+
+}
+
+/* EDITAR RESERVA */
+
+function editarReserva(index){
+
+    editando = index;
+
+    document.getElementById('cliente').value = reservas[index].cliente;
+
+    document.getElementById('hotel').value = reservas[index].hotel;
+
+    document.getElementById('entrada').value = reservas[index].entrada;
+
+    document.getElementById('saida').value = reservas[index].saida;
+
+    document.getElementById('valor').value = reservas[index].valor;
+
+    document.getElementById('status').value = reservas[index].status;
+
+    abrirModal();
+
+}
+
+/* FECHAR CLICANDO FORA */
+
+window.onclick = function(event){
+
+    const modal = document.getElementById('modal');
+
+    if(event.target == modal){
+
+        fecharModal();
+
+    }
+
+}
+
+/* SAIR DO SISTEMA */
+
+function sair(){
+
+    localStorage.removeItem('logado');
+
+    window.location.href = 'login.html';
+
+}
+
+/* CARREGAR TABELA */
+
+atualizarTabela();
+
+</script>
+
+</body>
+</html>

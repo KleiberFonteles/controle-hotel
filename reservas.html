@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Reservas</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+<h1>Nova Reserva</h1>
+
+<form action="/reservar" method="POST">
+<input type="text" name="cliente" placeholder="Cliente" required>
+<input type="text" name="hotel" placeholder="Hotel" required>
+<input type="date" name="entrada" required>
+<input type="date" name="saida" required>
+<input type="number" step="0.01" name="valor" placeholder="Valor" required>
+
+<select name="status">
+<option>Pendente</option>
+<option>Confirmada</option>
+</select>
+
+<button type="submit">Salvar Reserva</button>
+</form>
+
+<br>
+<a href="login.html">Sair</a>
+
+</div>
+
+</body>
+</html>
