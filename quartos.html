@@ -398,9 +398,19 @@ window.onclick = function(event){
 function sair(){
 
     localStorage.removeItem('logado');
+    localStorage.removeItem('isAdmin');
 
-    window.location.href = 'login.html';
+    window.location.href = '/logout';
 
+}
+
+/* DINAMIZAR MENU DO ADMIN */
+if (localStorage.getItem('isAdmin') === 'true') {
+    const menu = document.querySelector('.menu');
+    const linkUsuarios = document.createElement('a');
+    linkUsuarios.href = '/usuarios';
+    linkUsuarios.innerText = 'Usuários';
+    menu.insertBefore(linkUsuarios, menu.lastElementChild);
 }
 
 atualizarTabela();

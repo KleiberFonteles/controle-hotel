@@ -73,6 +73,33 @@ function processQuery(sql, params, callback) {
       return;
     }
 
+    // 3.5. SELECT * FROM usuarios WHERE id = ?
+    if (cleanSql.includes('select * from usuarios where id = ?') || cleanSql.includes('select * from usuarios where id=?')) {
+      const idBusca = Number(params[0]);
+      const resultados = data.usuarios.filter(u => Number(u.id) === idBusca);
+      if (callback) callback(null, resultados);
+      return;
+    }
+
+    // 3.6. UPDATE usuarios SET nome = ?, email = ?, senha = ? WHERE id = ?
+    if (cleanSql.includes('update usuarios set') && (cleanSql.includes('where id = ?') || cleanSql.includes('where id=?'))) {
+      const [nome, email, senha, id] = params;
+      const idUpdate = Number(id);
+      let atualizado = false;
+      data.usuarios = data.usuarios.map(u => {
+        if (Number(u.id) === idUpdate) {
+          atualizado = true;
+          return { id: u.id, nome, email, senha };
+        }
+        return u;
+      });
+      if (atualizado) {
+        writeDb(data);
+      }
+      if (callback) callback(null, { affectedRows: atualizado ? 1 : 0 });
+      return;
+    }
+
     // 4. SELECT * FROM usuarios
     if (cleanSql.includes('select * from usuarios')) {
       if (callback) callback(null, data.usuarios);

@@ -24,12 +24,22 @@
         }
 
         .btn-excluir{
-            background:red;
+            background:#dc2626;
             color:white;
             padding:8px 12px;
             border:none;
             border-radius:5px;
             text-decoration:none;
+        }
+
+        .btn-editar{
+            background:#f59e0b;
+            color:white;
+            padding:8px 12px;
+            border:none;
+            border-radius:5px;
+            text-decoration:none;
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -42,6 +52,9 @@
 <a href="/cadastro.html">
 <button>Incluir</button>
 </a>
+<a href="/crud.html">
+<button style="background: #64748b; margin-left: 10px;">Voltar ao Painel</button>
+</a>
 
 <br><br>
 
@@ -51,7 +64,7 @@
 <th>ID</th>
 <th>Nome</th>
 <th>Email</th>
-<th>Ação</th>
+<th>Ações</th>
 </tr>
 
 <% usuarios.forEach(usuario => { %>
@@ -62,7 +75,10 @@
 <td><%= usuario.email %></td>
 
 <td>
-<a class="btn-excluir" href="/excluir/<%= usuario.id %>">
+<a class="btn-editar" href="/editar-usuario/<%= usuario.id %>">
+Editar
+</a>
+<a class="btn-excluir" href="/excluir/<%= usuario.id %>" onclick="return confirm('Deseja realmente excluir este usuário?')">
 Excluir
 </a>
 </td>

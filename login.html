@@ -78,6 +78,9 @@ button:hover{
 Entrar
 </button>
 
+<p style="text-align: center; margin-top: 20px; font-size: 14px; color: #64748b;">Não possui uma conta?</p>
+<a href="cadastro.html" style="display: block; text-align: center; color: #2563eb; text-decoration: none; margin-top: 5px; font-weight: bold;">Cadastre-se</a>
+
 </div>
 
 <script>
@@ -104,6 +107,7 @@ async function fazerLogin(){
 
         if (data.success) {
             localStorage.setItem('logado', 'sim');
+            localStorage.setItem('isAdmin', data.isAdmin ? 'true' : 'false');
             window.location.href = data.redirect;
         } else {
             alert(data.message || 'Usuário ou senha incorretos');

@@ -45,6 +45,31 @@ CREATE TABLE reservas (
 )
 `);
 
+/* MIDDLEWARE PARA VERIFICAR SE É ADMINISTRADOR */
+function verificarAdmin(req, res, next) {
+  const cookieHeader = req.headers.cookie || '';
+  const cookies = {};
+  cookieHeader.split(';').forEach(c => {
+    const parts = c.split('=');
+    if (parts.length === 2) {
+      cookies[parts[0].trim()] = parts[1].trim();
+    }
+  });
+
+  if (cookies.isAdmin === 'true') {
+    next();
+  } else {
+    res.status(403).send(`
+      <div style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px;">
+        <h2>Acesso Negado 🛑</h2>
+        <p>Apenas o administrador do hotel tem permissão para visualizar, editar ou excluir contas.</p>
+        <br>
+        <a href="/login.html" style="background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Ir para o Login</a>
+      </div>
+    `);
+  }
+}
+
 /* CADASTRO */
 app.post('/cadastrar', (req, res) => {
   const nome = req.body.nome.trim();
@@ -70,7 +95,8 @@ app.post('/login', (req, res) => {
 
   // Permite login com admin padrão
   if (email === 'admin' && senha === '123') {
-    return res.json({ success: true, redirect: '/crud.html' });
+    res.setHeader('Set-Cookie', 'isAdmin=true; Path=/; HttpOnly');
+    return res.json({ success: true, redirect: '/crud.html', isAdmin: true });
   }
 
   const sql = "SELECT * FROM usuarios WHERE email = ?";
@@ -83,7 +109,8 @@ app.post('/login', (req, res) => {
 
     if (resultado.length > 0) {
       if (resultado[0].senha === senha) {
-        res.json({ success: true, redirect: '/crud.html' });
+        res.setHeader('Set-Cookie', 'isAdmin=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly');
+        res.json({ success: true, redirect: '/crud.html', isAdmin: false });
       } else {
         res.json({ success: false, message: "Senha incorreta!" });
       }
@@ -91,6 +118,12 @@ app.post('/login', (req, res) => {
       res.json({ success: false, message: "Usuário não encontrado!" });
     }
   });
+});
+
+/* LOGOUT */
+app.get('/logout', (req, res) => {
+  res.setHeader('Set-Cookie', 'isAdmin=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly');
+  res.redirect('/login.html');
 });
 
 /* CADASTRAR RESERVA */
@@ -112,14 +145,11 @@ app.post('/reservar', (req, res) => {
   });
 });
 
-/* LISTAR USUÁRIOS */
-
-app.get('/usuarios', (req, res) => {
-
+/* LISTAR USUÁRIOS (PROTEGIDO) */
+app.get('/usuarios', verificarAdmin, (req, res) => {
   const sql = "SELECT * FROM usuarios";
 
   conexao.query(sql, (erro, resultado) => {
-
     if (erro) {
       console.log(erro);
       res.send("Erro ao buscar usuários");
@@ -128,30 +158,56 @@ app.get('/usuarios', (req, res) => {
         usuarios: resultado
       });
     }
-
   });
-
 });
 
-/* EXCLUIR USUÁRIO */
+/* FORMULÁRIO DE EDIÇÃO DE USUÁRIO (PROTEGIDO) */
+app.get('/editar-usuario/:id', verificarAdmin, (req, res) => {
+  const id = req.params.id;
+  const sql = "SELECT * FROM usuarios WHERE id = ?";
+  conexao.query(sql, [id], (erro, resultado) => {
+    if (erro || resultado.length === 0) {
+      res.send("Usuário não encontrado");
+    } else {
+      res.render('editar-usuario', {
+        usuario: resultado[0]
+      });
+    }
+  });
+});
 
-app.get('/excluir/:id', (req, res) => {
+/* SALVAR EDIÇÃO DE USUÁRIO (PROTEGIDO) */
+app.post('/editar-usuario/:id', verificarAdmin, (req, res) => {
+  const id = req.params.id;
+  const nome = req.body.nome.trim();
+  const email = req.body.email.trim().toLowerCase();
+  const senha = req.body.senha.trim();
 
+  const sql = "UPDATE usuarios SET nome = ?, email = ?, senha = ? WHERE id = ?";
+  conexao.query(sql, [nome, email, senha, id], (erro) => {
+    if (erro) {
+      console.log(erro);
+      res.send("Erro ao editar usuário");
+    } else {
+      res.redirect('/usuarios');
+    }
+  });
+});
+
+/* EXCLUIR USUÁRIO (PROTEGIDO) */
+app.get('/excluir/:id', verificarAdmin, (req, res) => {
   const id = req.params.id;
 
   const sql = "DELETE FROM usuarios WHERE id = ?";
 
   conexao.query(sql, [id], (erro) => {
-
     if (erro) {
       console.log(erro);
       res.send("Erro ao excluir");
     } else {
       res.redirect('/usuarios');
     }
-
   });
-
 });
 
 const PORT = process.env.PORT || 3000;
